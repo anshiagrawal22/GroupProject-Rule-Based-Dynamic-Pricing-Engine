@@ -61,11 +61,11 @@ const HotelDetail = () => {
 
         <div className="hotel-detail-image-grid">
           <div className="main-image">
-            <img src={image} alt={name} />
+            <img src={hotel.images ? hotel.images[0] : image} alt={name} />
           </div>
           <div className="side-images">
-            <img src={`${image}&auto=format&fit=crop&w=400&q=80`} alt={`${name} view 2`} />
-            <img src={`${image}&auto=format&fit=crop&w=400&q=80`} alt={`${name} view 3`} />
+            <img src={hotel.images && hotel.images[1] ? hotel.images[1] : `${image}&auto=format&fit=crop&w=400&q=80`} alt={`${name} view 2`} />
+            <img src={hotel.images && hotel.images[2] ? hotel.images[2] : (hotel.images && hotel.images[1] ? hotel.images[1] : `${image}&auto=format&fit=crop&w=400&q=80`)} alt={`${name} view 3`} />
           </div>
         </div>
 
