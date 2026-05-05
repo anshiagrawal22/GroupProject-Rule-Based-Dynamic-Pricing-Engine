@@ -10,8 +10,8 @@ const seedData = async () => {
     await mongoose.connect(MONGO_URI);
     console.log('MongoDB Connected for seeding...');
 
-    // Clear existing reviews
-    await Review.deleteMany({});
+    // Skip clearing existing reviews to preserve user-added data
+    // await Review.deleteMany({});
     
     // Create a dummy user if not exists
     let user = await User.findOne({ email: 'admin@aureva.com' });
@@ -21,9 +21,14 @@ const seedData = async () => {
       user = await User.create({
         name: 'Admin User',
         email: 'admin@aureva.com',
-        password: hashedPassword
+        password: hashedPassword,
+        role: 'admin'
       });
       console.log('Dummy user created');
+    } else {
+      user.role = 'admin';
+      await user.save();
+      console.log('Existing admin user updated with admin role');
     }
 
     const reviews = [
@@ -67,8 +72,13 @@ const seedData = async () => {
       }
     ];
 
-    await Review.insertMany(reviews);
-    console.log('Dummy reviews added');
+    for (const review of reviews) {
+      const exists = await Review.findOne({ title: review.title, hotelId: review.hotelId });
+      if (!exists) {
+        await Review.create(review);
+      }
+    }
+    console.log('Seed process completed');
 
     process.exit();
   } catch (error) {

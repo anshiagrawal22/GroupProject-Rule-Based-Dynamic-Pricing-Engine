@@ -6,9 +6,10 @@ import HotelList from './components/HotelList';
 import HotelDetail from './components/HotelDetail';
 import BookingConfirmation from './components/BookingConfirmation';
 import ReviewManagementDashboard from './components/ReviewManagementDashboard';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, AuthContext } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useContext } from 'react';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -16,6 +17,24 @@ const ScrollToTop = () => {
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
+};
+
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useContext(AuthContext);
+  
+  if (loading) return null;
+  
+  if (!user || user.role !== 'admin') {
+    return (
+      <div style={{ padding: '100px 0', textAlign: 'center', color: 'white' }}>
+        <h2>Access Denied</h2>
+        <p>You do not have permission to view this page.</p>
+        <Link to="/" className="btn btn-primary">Back to Home</Link>
+      </div>
+    );
+  }
+  
+  return children;
 };
 
 function App() {
@@ -29,13 +48,21 @@ function App() {
           <Routes>
             <Route path="/" element={
               <>
-                <HeroSection onSearch={setSearchLocation} />
-                <HotelList searchLocation={searchLocation} />
+                <div id="hero">
+                  <HeroSection onSearch={setSearchLocation} />
+                </div>
+                <div id="stays">
+                  <HotelList searchLocation={searchLocation} />
+                </div>
               </>
             } />
             <Route path="/hotel/:id" element={<HotelDetail />} />
             <Route path="/reserve/:id" element={<BookingConfirmation />} />
-            <Route path="/admin/reviews" element={<ReviewManagementDashboard />} />
+            <Route path="/admin/reviews" element={
+              <ProtectedRoute>
+                <ReviewManagementDashboard />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={
               <div style={{ padding: '100px 0', textAlign: 'center', color: 'white' }}>
                 <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>404</h1>
@@ -46,7 +73,7 @@ function App() {
             } />
           </Routes>
           
-          <footer style={{ padding: '4rem 0 2rem', backgroundColor: '#1a1b1e', color: '#9ca3af', borderTop: '1px solid #2d2e32' }}>
+          <footer id="contact" style={{ padding: '4rem 0 2rem', backgroundColor: '#1a1b1e', color: '#9ca3af', borderTop: '1px solid #2d2e32' }}>
             <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '3rem', marginBottom: '3rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
